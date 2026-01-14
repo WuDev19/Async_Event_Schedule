@@ -37,7 +37,7 @@ public class ProductService {
             sp = sp.and(SpecificationProduct.hasDiscount(Integer.parseInt((String)map.get("discount"))));
         }
         List<Product> list = productRepository.findAll(sp);
-        publisher.publishEvent(new ProductQueryEvent(list));
+        publisher.publishEvent(new ProductQueryEvent(list)); //phải trong transaction mới chạy được vì bên kia lắng nghe bằng @TransactionalEventListener
         return list;
     }
 
