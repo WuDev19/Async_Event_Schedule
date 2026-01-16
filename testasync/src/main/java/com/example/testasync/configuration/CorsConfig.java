@@ -11,6 +11,7 @@ import java.util.Collections;
 
 /*
 Khi gọi request thì nó sẽ check cors trước, nó sẽ vào các policy mình cấu hình để check, nếu thỏa mãn thì mới cho đi tiếp
+Origin = Giao thức (Protocol) + Tên miền (Domain) + Cổng (Port). Ví dụ: origin = http + example.com + 1234
 Có 4 cách cấu hình CORS:
 - Cách 1: Dùng @CrossOrigin trên từng api cụ thể hoặc trên đầu của 1 class Controller
 - Cách 2: Dùng WebMvcConfigurer, tuy nhiên nếu project có spring security thì sẽ bị ghi đè (nên dùng khi project ko cấu hình Spring Security)

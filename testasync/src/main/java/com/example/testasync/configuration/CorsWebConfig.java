@@ -17,6 +17,7 @@ public class CorsWebConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .allowedOriginPatterns("http://localhost:8080/*-app.com")
                 .maxAge(3600L);
+        //nếu thêm cho role khác thì corsRegistry.addMapping().... tiếp
     }
 
 }
