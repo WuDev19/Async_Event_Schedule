@@ -23,9 +23,10 @@ public class CorsConfig {
 
     @Bean
     public CorsFilter corsConfiguration() {
-        CorsConfiguration config = getCorsConfiguration();
+        CorsConfiguration config1 = getCorsConfiguration();
         UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
-        corsConfigurationSource.registerCorsConfiguration("/**", config); //tham số pattern /** là dùng cho mọi api, nếu muốn chỉ dùng cho 1 loại api cụ thể thì như này /api/product/** (** là vô số cấp đằng sau, còn * là chỉ 1 cấp sau nó)
+        corsConfigurationSource.registerCorsConfiguration("/**", config1); //tham số pattern /** là dùng cho mọi api, nếu muốn chỉ dùng cho 1 loại api cụ thể thì như này /api/product/** (** là vô số cấp đằng sau, còn * là chỉ 1 cấp sau nó)
+//        corsConfigurationSource.registerCorsConfiguration("/admin/**", config2);
         return new CorsFilter(corsConfigurationSource);
     }
 
