@@ -11,7 +11,12 @@ public class CorsWebConfig implements WebMvcConfigurer {
     @Bean
     public void addCorsConfig(CorsRegistry corsRegistry){
         corsRegistry.addMapping("/**")
-                .
+                .allowedHeaders("Content-Type", "Authorization")
+                .exposedHeaders("Custom-Header")
+                .allowedMethods("POST", "GET", "PUT", "PATCH")
+                .allowCredentials(true)
+                .allowedOriginPatterns("http://localhost:8080/*-app.com")
+                .maxAge(3600L);
     }
 
 }
