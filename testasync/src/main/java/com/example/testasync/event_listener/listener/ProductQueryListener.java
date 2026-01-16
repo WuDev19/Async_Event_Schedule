@@ -1,5 +1,6 @@
-package com.example.testasync.event_listener;
+package com.example.testasync.event_listener.listener;
 
+import com.example.testasync.event_listener.event.ProductQueryEvent;
 import com.example.testasync.service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -17,6 +18,7 @@ public class ProductQueryListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void listener(ProductQueryEvent event){
         logService.log(event.getProduct());
+        System.out.println(Thread.currentThread().getName());
     }
 
 }

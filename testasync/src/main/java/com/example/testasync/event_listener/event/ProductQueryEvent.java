@@ -1,4 +1,4 @@
-package com.example.testasync.event_listener;
+package com.example.testasync.event_listener.event;
 
 import com.example.testasync.entity.Product;
 

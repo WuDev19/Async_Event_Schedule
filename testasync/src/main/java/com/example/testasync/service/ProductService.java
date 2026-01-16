@@ -1,7 +1,7 @@
 package com.example.testasync.service;
 
 import com.example.testasync.entity.Product;
-import com.example.testasync.event_listener.ProductQueryEvent;
+import com.example.testasync.event_listener.event.ProductQueryEvent;
 import com.example.testasync.repository.ProductRepository;
 import com.example.testasync.specification.SpecificationProduct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +38,7 @@ public class ProductService {
         }
         List<Product> list = productRepository.findAll(sp);
         publisher.publishEvent(new ProductQueryEvent(list)); //phải trong transaction mới chạy được vì bên kia lắng nghe bằng @TransactionalEventListener
+        System.out.println(Thread.currentThread().getName());
         return list;
     }
 
