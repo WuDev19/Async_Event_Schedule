@@ -1,5 +1,6 @@
 package com.example.testasync.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -28,11 +29,15 @@ public class Product {
     @Column(name = "numberBought", columnDefinition = "int constraint df_number default 0", insertable = false, nullable = false)
     private Integer numberBought;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", referencedColumnName = "userId")
+    @JsonBackReference
+    private User usr_pro;
+
     public Product() {
     }
 
-    public Product(Integer maSp, String tenNguoiBan, Integer giaSp, String motaSp, String thumbnail, Integer giamgia, Integer numberBought) {
-        this.maSp = maSp;
+    public Product(String tenNguoiBan, Integer giaSp, String motaSp, String thumbnail, Integer giamgia, Integer numberBought) {
         this.tenNguoiBan = tenNguoiBan;
         this.giaSp = giaSp;
         this.motaSp = motaSp;
@@ -97,5 +102,12 @@ public class Product {
         this.numberBought = numberBought;
     }
 
+    public User getUsr_pro() {
+        return usr_pro;
+    }
+
+    public void setUsr_pro(User usr_pro) {
+        this.usr_pro = usr_pro;
+    }
 }
 
