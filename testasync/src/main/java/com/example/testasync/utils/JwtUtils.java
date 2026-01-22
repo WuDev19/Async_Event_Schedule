@@ -16,7 +16,7 @@ public class JwtUtils {
     private String secret_key;
 
     public String generateToken (UserDetails userDetails, String fullName){
-        var EXPIRATION = 15 * 60 * 1000;
+        var EXPIRATION = 60 * 60 * 1000;
         return Jwts.builder()
                 .subject(userDetails.getUsername()) //tiêu đề thường để username unique để truy vấn lấy instance từ db
                 .claim("fullName", fullName) //thông tin thêm

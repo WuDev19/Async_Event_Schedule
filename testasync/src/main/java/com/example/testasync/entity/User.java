@@ -30,7 +30,7 @@ public class User {
     @Column(name = "password", nullable = false, columnDefinition = "nvarchar(100) constraint ck_pass check (len(password) > 6)")
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "userId"),

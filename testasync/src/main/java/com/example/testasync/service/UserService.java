@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.naming.AuthenticationException;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -72,4 +73,13 @@ public class UserService {
                 token
         );
     }
+
+    public User getUserDetail(String id) throws Exception{
+        return userRepository.findById(id).orElseThrow();
+    }
+
+    public List<User> getAll(){
+        return userRepository.findAll();
+    }
+
 }
