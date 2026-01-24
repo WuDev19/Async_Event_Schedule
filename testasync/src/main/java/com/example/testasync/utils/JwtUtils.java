@@ -1,13 +1,27 @@
 package com.example.testasync.utils;
 
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jose.produce.JWSSignerFactory;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.stereotype.Component;
+
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class JwtUtils {
@@ -15,43 +29,55 @@ public class JwtUtils {
     @Value("${jwt.secret.key}")
     private String secret_key;
 
-    public String generateToken (UserDetails userDetails, String fullName){
+    public String generateToken(UserDetails userDetails, String fullName) {
         var EXPIRATION = 60 * 60 * 1000;
-        return Jwts.builder()
+        var roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        StringBuilder scope = new StringBuilder();
+        for (String sc : roles) {
+            assert sc != null;
+            sc = sc.replace("ROLE_", "");
+            scope.append(sc).append(" ");
+        }
+        //Cách generate jwt dùng nimbus
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userDetails.getUsername()) //tiêu đề thường để username unique để truy vấn lấy instance từ db
-                .claim("fullName", fullName) //thông tin thêm
-                .issuedAt(new Date()) //thời gian bắt đầu tạo
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION)) //hạn của token
-                .signWith(Keys.hmacShaKeyFor(secret_key.getBytes(StandardCharsets.UTF_8)), Jwts.SIG.HS256) //bắt buộc phải ký, nếu dùng thuật toán ký thì dùng Jwts.
-                .compact();
+                .claim("fullName", fullName)//thông tin thêm
+                .claim("scope", scope.toString().trim())
+                .issueTime(new Date())//thời gian bắt đầu tạo
+                .expirationTime(new Date(System.currentTimeMillis() + EXPIRATION))//hạn của token
+                .build();
+        JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS256);
+        Payload payload = new Payload(claimsSet.toJSONObject());
+        JWSObject jwsObject = new JWSObject(jwsHeader, payload);
+        try {
+            jwsObject.sign(new MACSigner(Keys.hmacShaKeyFor(secret_key.getBytes(StandardCharsets.UTF_8)))); //bắt buộc phải ký
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
+        }
+        return jwsObject.serialize();
     }
 
-    private Claims extractClaims(String token){
-        return Jwts.parser() //khởi tạo jwt parser để phân tích token
-                .verifyWith(Keys.hmacShaKeyFor(secret_key.getBytes(StandardCharsets.UTF_8))) //tạo khóa bí mật để xác minh chũ ký
-                .build() //tạo jwt parser hoàn chỉnh
-                .parseSignedClaims(token) //chia token làm 3 phần sau đó xác thực
-                .getPayload();
+    private JWTClaimsSet extractClaims(String token) {
+        //extract sử dụng nimbus
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            JWSVerifier jwsVerifier = new MACVerifier(Keys.hmacShaKeyFor(secret_key.getBytes(StandardCharsets.UTF_8))); //lấy ra verifier để xác minh
+            var verified = signedJWT.verify(jwsVerifier); //so sánh xem chữ ký có giống nhau ko
+            return signedJWT.getJWTClaimsSet();
+        } catch (ParseException | JOSEException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public String extractUsername(String token){
+    public String extractUsername(String token) {
         return extractClaims(token).getSubject();
     }
 
-    public String extractFullName(String token){
-        return extractClaims(token).get("fullName").toString();
-    }
-
-    public boolean isTokenNotExpire(String token){
-        return extractClaims(token).getExpiration().before(new Date());
-    }
-
-    public boolean validateToken(String token, UserDetails userDetails){
-        String username = extractUsername(token);
-        try{
-            return username.equals(userDetails.getUsername()) && !isTokenNotExpire(token);
-        }
-        catch (Exception e){
+    public boolean validateToken(String token, UserDetails userDetails) {
+        try {
+            Date date = extractClaims(token).getExpirationTime();
+            return date.before(new Date()) || !userDetails.getUsername().equals(extractUsername(token));
+        } catch (Exception e) {
             return false;
         }
     }
