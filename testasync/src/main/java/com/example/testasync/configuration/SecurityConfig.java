@@ -72,8 +72,8 @@ public class SecurityConfig {
 
     private JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder
-                .withSecretKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
-                .macAlgorithm(MacAlgorithm.HS256)
+                .withSecretKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8))) //xác minh đúng chữ ký thì với decode được
+                .macAlgorithm(MacAlgorithm.HS256) //giống với thuật toán mình generate token
                 .build();
     }
 
